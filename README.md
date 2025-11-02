@@ -1,6 +1,8 @@
 # SpaceX AI - Spring Boot REST Service
 
-A Spring Boot 3.4 REST service that uses Spring AI with Anthropic Claude to query the public SpaceX API (https://docs.spacexdata.com/) through natural language prompts. The service exposes REST endpoints with @Tool annotated methods for function calling and includes an MCP (Model Context Protocol) tool server for AI agents.
+A Spring Boot 3.4 REST service that uses Spring AI with Anthropic Claude to query the public SpaceX API (https://docs.spacexdata.com/) through natural language prompts. The service exposes REST endpoints and includes an MCP (Model Context Protocol) tool server for AI agents.
+
+> 📚 **New to the API?** Check out [EXAMPLES.md](EXAMPLES.md) for detailed usage examples in multiple languages!
 
 ## Features
 
