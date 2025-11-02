@@ -86,6 +86,10 @@ mvn clean package
 # Run the application
 export ANTHROPIC_API_KEY=your-api-key
 mvn spring-boot:run
+
+# OR use the convenience script
+export ANTHROPIC_API_KEY=your-api-key
+./run.sh
 ```
 
 ### 4. Run with Docker Compose
@@ -102,6 +106,15 @@ docker-compose down
 ```
 
 ## API Endpoints
+
+### Quick Test
+
+You can run the included test script to try out the API:
+
+```bash
+# Make sure the application is running first
+./test-api.sh
+```
 
 ### Health Check
 
