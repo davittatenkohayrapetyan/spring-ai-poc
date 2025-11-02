@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM maven:3.9.9-eclipse-temurin-17 AS builder
 WORKDIR /app
 
 # Copy Maven files
@@ -6,18 +6,23 @@ COPY pom.xml .
 COPY src ./src
 
 # Build the application
-RUN apk add --no-cache maven && \
-    mvn clean package -DskipTests && \
-    mv target/*.jar app.jar
+RUN mvn -B -DskipTests clean package
 
-FROM eclipse-temurin:17-jre-alpine
+# Use a lightweight, multi-arch runtime (Ubuntu Jammy)
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
-# Copy the built jar
-COPY --from=builder /app/app.jar .
+# Install curl for healthcheck
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
-RUN addgroup -S spring && adduser -S spring -G spring
+# Copy the built jar
+COPY --from=builder /app/target/*.jar /app/app.jar
+
+# Create a non-root user (Debian/Ubuntu base)
+RUN groupadd --system spring \
+    && useradd --system --gid spring --create-home spring
 USER spring:spring
 
 # Expose the application port

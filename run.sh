@@ -3,9 +3,9 @@
 # Startup script for SpaceX AI REST service
 
 # Check if API key is set
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo "Error: ANTHROPIC_API_KEY environment variable is not set"
-    echo "Please set it with: export ANTHROPIC_API_KEY=your-api-key"
+if [ -z "$OPENAI_API_KEY" ]; then
+    echo "Error: OPENAI_API_KEY environment variable is not set"
+    echo "Please set it with: export OPENAI_API_KEY=your-api-key"
     echo "Or create a .env file with your API key"
     exit 1
 fi

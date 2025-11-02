@@ -8,7 +8,7 @@ Thank you for your interest in contributing to the SpaceX AI project!
 
 - Java 17 or higher
 - Maven 3.8+
-- An Anthropic API key for testing
+- An OpenAI API key for testing
 
 ### Getting Started
 
@@ -21,7 +21,7 @@ Thank you for your interest in contributing to the SpaceX AI project!
 2. Set up your environment:
    ```bash
    cp .env.example .env
-   # Edit .env and add your Anthropic API key
+   # Edit .env and add your OpenAI API key
    ```
 
 3. Build the project:
@@ -31,7 +31,7 @@ Thank you for your interest in contributing to the SpaceX AI project!
 
 4. Run the application:
    ```bash
-   export ANTHROPIC_API_KEY=your-api-key
+   export OPENAI_API_KEY=your-api-key
    mvn spring-boot:run
    ```
 
@@ -148,11 +148,11 @@ Configuration can be updated in `src/main/resources/application.yml`:
 ```yaml
 spring:
   ai:
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY}
+    openai:
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
-          model: claude-3-5-sonnet
+          model: gpt-4o-mini
           temperature: 0.7
           max-tokens: 4096
 ```
@@ -178,9 +178,9 @@ If you encounter build issues:
 
 If the application fails to start:
 
-1. Check that the Anthropic API key is set:
+1. Check that the OpenAI API key is set:
    ```bash
-   echo $ANTHROPIC_API_KEY
+   echo $OPENAI_API_KEY
    ```
 
 2. Verify the SpaceX API is accessible:
