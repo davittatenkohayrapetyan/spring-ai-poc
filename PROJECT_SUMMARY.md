@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements a Spring Boot 3.4 REST service that integrates Spring AI with Anthropic Claude to provide natural language querying capabilities for the public SpaceX API.
+This project implements a Spring Boot 3.4 REST service that integrates Spring AI with a locally hosted Ollama model (phi3:mini) to provide natural language querying capabilities for the public SpaceX API.
 
 ## What Was Built
 
@@ -21,10 +21,10 @@ This project implements a Spring Boot 3.4 REST service that integrates Spring AI
   - Launchpads (all, by ID)
 
 ### 3. AI Integration
-- **AnthropicConfiguration.java**: Configuration for Anthropic Claude API
-- Model: claude-3-5-sonnet
+- **ChatClientConfiguration.java**: ChatClient configuration wired to the Spring AI Ollama starter
+- Model: phi3:mini (runs locally via Ollama)
 - Temperature: 0.7
-- Max tokens: 4096
+- Max predictions: 1024 tokens
 
 ### 4. REST API
 - **SpaceXAiController.java**: Main REST controller
@@ -54,7 +54,7 @@ This project implements a Spring Boot 3.4 REST service that integrates Spring AI
 
 ### 9. Configuration
 - **application.yml**: Application configuration with:
-  - Anthropic API key configuration
+  - Ollama endpoint configuration (defaults to http://localhost:11434)
   - SpaceX API base URL
   - Server port (8080)
   - Actuator endpoints
@@ -62,10 +62,11 @@ This project implements a Spring Boot 3.4 REST service that integrates Spring AI
 
 ### 10. Deployment
 - **Dockerfile**: Multi-stage Docker build with Java 17
-- **docker-compose.yml**: Docker Compose with two services:
+- **docker-compose.yml**: Docker Compose with three services:
+  - `ollama`: Local LLM runtime hosting phi3:mini
   - `spacex-ai`: Main REST API service
   - `spacex-ai-mcp`: MCP tool server
-- Includes health checks and proper configuration
+- Includes health checks, automatic model download, and proper configuration
 
 ### 11. Developer Tools
 - **run.sh**: Convenience script to build and run the application
@@ -92,7 +93,7 @@ This project implements a Spring Boot 3.4 REST service that integrates Spring AI
 ## Key Features Implemented
 
 ✅ Spring Boot 3.4 REST service
-✅ Spring AI integration with Anthropic Claude
+✅ Spring AI integration with local Ollama model
 ✅ Full SpaceX API client implementation
 ✅ Natural language query endpoint (`/ask`)
 ✅ MCP tool server for AI agents
@@ -115,8 +116,7 @@ This project implements a Spring Boot 3.4 REST service that integrates Spring AI
 
 ### Quick Start
 ```bash
-# Set API key
-export ANTHROPIC_API_KEY=your-key
+# Ensure Ollama is running (docker-compose up ollama)
 
 # Build and run
 ./run.sh
@@ -142,16 +142,16 @@ docker-compose up
 
 ### Request Flow
 1. User sends natural language question to `/api/ask`
-2. Spring AI formats the request for Claude
-3. Claude processes the question
+2. Spring AI formats the request for the local Ollama model
+3. The model processes the question
 4. Response is returned as structured JSON
 5. User receives AI-powered answer
 
 ### SpaceX Data Flow
 1. Controller receives question
-2. Claude AI analyzes the question
+2. Local LLM analyzes the question
 3. Application can fetch relevant SpaceX data
-4. Claude synthesizes answer from available data
+4. LLM synthesizes answer from available data
 5. Response includes question, answer, and metadata
 
 ## Future Enhancements
@@ -175,22 +175,22 @@ Potential additions (not implemented in current version):
 ### Why Spring AI 1.0.3?
 - Stable GA release
 - Available in Maven Central (no network issues)
-- Reliable Anthropic integration
+- Includes first-class Ollama starter
 
-### Why Claude?
-- Excellent natural language understanding
-- High-quality responses
-- Good API documentation
-- Specified in requirements
+### Why Ollama + phi3:mini?
+- Runs entirely on local hardware
+- Lightweight (~2.2 GB) but capable small language model
+- Easy to orchestrate with Docker Compose
+- No external API keys required
 
 ### Why Blocking WebClient?
 - Simpler code for this use case
-- Adequate performance for AI use case (already async via Claude)
+- Adequate performance for AI use case (already async via Spring AI + Ollama)
 - Easier to understand and maintain
 
 ## Security Considerations
 
-- API key stored in environment variable (never in code)
+- Ollama endpoint configurable via environment variable
 - Docker container runs as non-root user
 - No sensitive data logged
 - HTTPS recommended for production deployment
@@ -198,7 +198,7 @@ Potential additions (not implemented in current version):
 
 ## Performance Notes
 
-- Average response time: 2-5 seconds (depends on Claude API)
+- Average response time: 2-5 seconds (depends on local hardware + Ollama model)
 - JAR startup time: ~10-15 seconds
 - Memory usage: ~300-500 MB typical
 - Container size: ~200 MB compressed

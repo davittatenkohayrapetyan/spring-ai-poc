@@ -1,15 +1,45 @@
 version: '3.8'
 
 services:
+  ollama:
+    image: ollama/ollama:0.3.12
+    container_name: spacex-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  ollama-init:
+    image: ollama/ollama:0.3.12
+    container_name: spacex-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c", "OLLAMA_HOST=http://ollama:11434 ollama pull phi3:mini"]
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: "no"
+
   spacex-ai:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: spacex-ai
+    depends_on:
+      ollama:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SPRING_PROFILES_ACTIVE=prod
     restart: unless-stopped
     healthcheck:
@@ -30,3 +60,6 @@ services:
     stdin_open: true
     tty: true
     restart: unless-stopped
+
+volumes:
+  ollama-data:
