@@ -8,7 +8,7 @@ Thank you for your interest in contributing to the SpaceX AI project!
 
 - Java 17 or higher
 - Maven 3.8+
-- An OpenAI API key for testing
+- Local Ollama runtime (Docker Compose setup provided)
 
 ### Getting Started
 
@@ -18,20 +18,14 @@ Thank you for your interest in contributing to the SpaceX AI project!
    cd spring-ai-poc
    ```
 
-2. Set up your environment:
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your OpenAI API key
-   ```
-
-3. Build the project:
+2. Build the project:
    ```bash
    mvn clean install
    ```
 
-4. Run the application:
+3. Run the application:
    ```bash
-   export OPENAI_API_KEY=your-api-key
+   # Ensure the Ollama service is running (docker-compose up ollama)
    mvn spring-boot:run
    ```
 
@@ -148,13 +142,13 @@ Configuration can be updated in `src/main/resources/application.yml`:
 ```yaml
 spring:
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       chat:
         options:
-          model: gpt-4o-mini
+          model: phi3:mini
           temperature: 0.7
-          max-tokens: 4096
+          num-predict: 1024
 ```
 
 ## Troubleshooting
@@ -178,9 +172,9 @@ If you encounter build issues:
 
 If the application fails to start:
 
-1. Check that the OpenAI API key is set:
+1. Check that the Ollama service is reachable:
    ```bash
-   echo $OPENAI_API_KEY
+   curl http://localhost:11434/api/version
    ```
 
 2. Verify the SpaceX API is accessible:

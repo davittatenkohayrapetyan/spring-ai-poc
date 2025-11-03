@@ -26,14 +26,7 @@ curl -X POST http://localhost:8080/api/ask \
 ```json
 {
   "question": "What was the latest SpaceX launch?",
-  "answer": "The latest SpaceX launch was...",
-  "metadata": {
-    "model": "claude-3-5-sonnet",
-    "usage": {
-      "inputTokens": 25,
-      "outputTokens": 150
-    }
-  }
+  "answer": "The latest SpaceX launch was..."
 }
 ```
 
@@ -309,31 +302,13 @@ All `/ask` endpoint responses follow this format:
 ```json
 {
   "question": "The original question",
-  "answer": "Claude's response based on SpaceX data",
-  "metadata": {
-    "model": "claude-3-5-sonnet",
-    "usage": {
-      "inputTokens": 25,
-      "outputTokens": 150
-    }
-  }
+  "answer": "The model's response based on SpaceX data"
 }
 ```
 
 ## Error Handling
 
 The API may return errors in these scenarios:
-
-### Missing API Key
-
-```json
-{
-  "timestamp": "2025-11-02T13:00:00.000+00:00",
-  "status": 500,
-  "error": "Internal Server Error",
-  "message": "API key not configured"
-}
-```
 
 ### Invalid Request
 
@@ -353,7 +328,7 @@ The API may return errors in these scenarios:
   "timestamp": "2025-11-02T13:00:00.000+00:00",
   "status": 503,
   "error": "Service Unavailable",
-  "message": "Unable to connect to Anthropic API"
+  "message": "Unable to connect to Ollama service"
 }
 ```
 
@@ -387,7 +362,7 @@ docker ps | grep spacex-ai
 
 ### Slow Responses
 
-Claude AI responses may take a few seconds. For better UX:
+Local model responses may take a few seconds, especially on the first request while the model loads into memory. For better UX:
 - Show a loading indicator
 - Set appropriate timeouts (30-60 seconds)
 - Implement retry logic for transient failures
@@ -395,6 +370,6 @@ Claude AI responses may take a few seconds. For better UX:
 ### Invalid Responses
 
 If responses don't make sense:
-- Verify your Anthropic API key is valid
+- Verify the Ollama service is healthy (`curl http://localhost:11434/api/version`)
 - Check the question is clear and specific
 - Review the SpaceX API data availability

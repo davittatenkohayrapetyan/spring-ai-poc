@@ -1,11 +1,11 @@
 # SpaceX AI - Spring Boot REST Service
 
-A Spring Boot 3.4 REST service that uses Spring AI with OpenAI to query the public SpaceX API (https://docs.spacexdata.com/) through natural language prompts. The service exposes REST endpoints and includes an MCP (Model Context Protocol) tool server for AI agents.
+A Spring Boot 3.4 REST service that uses Spring AI with a locally hosted LLM (via Ollama) to query the public SpaceX API (https://docs.spacexdata.com/) through natural language prompts. The service exposes REST endpoints and includes an MCP (Model Context Protocol) tool server for AI agents.
 
 ## Features
 
 - 🚀 Spring Boot 3.4 with Java 17
-- 🤖 Spring AI integration with OpenAI (default model: gpt-4o-mini)
+- 🤖 Spring AI integration with a local Ollama model (default: phi3:mini)
 - 📡 SpaceX API Client for launches, rockets, ships, and launchpads
 - 💬 Natural Language Interface via `/ask` endpoint
 - 🔌 MCP Tool Server for AI agent integration
@@ -24,7 +24,7 @@ A Spring Boot 3.4 REST service that uses Spring AI with OpenAI to query the publ
 │          Spring Boot Application        │
 │                                         │
 │  ┌─────────────┐    ┌──────────────┐  │
-│  │ /ask        │───▶│ OpenAI via   │  │
+│  │ /ask        │───▶│ Ollama via   │  │
 │  │ endpoint    │    │ Spring AI    │  │
 │  └─────────────┘    └──────┬───────┘  │
 │                             │          │
@@ -51,8 +51,7 @@ A Spring Boot 3.4 REST service that uses Spring AI with OpenAI to query the publ
 
 - Java 17 or higher
 - Maven 3.8+
-- Docker & Docker Compose (optional, for containerized deployment)
-- OpenAI API Key (get one from https://platform.openai.com/)
+- Docker & Docker Compose (for containerized deployment and local LLM)
 
 ## Quick Start
 
@@ -63,18 +62,12 @@ git clone https://github.com/davittatenkohayrapetyan/spring-ai-poc.git
 cd spring-ai-poc
 ```
 
-### 2. Set Up Environment Variables
+### 2. (Optional) Configure Ollama Endpoint
 
-Create a `.env` file from the template:
+If you're running the Java application outside of Docker you can optionally set a custom Ollama endpoint (defaults to `http://localhost:11434`):
 
 ```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your OpenAI API key:
-
-```
-OPENAI_API_KEY=your-actual-api-key-here
+export OLLAMA_BASE_URL=http://localhost:11434
 ```
 
 ### 3. Run with Maven
@@ -83,19 +76,17 @@ OPENAI_API_KEY=your-actual-api-key-here
 # Build the project
 mvn clean package
 
-# Run the application
-export OPENAI_API_KEY=your-api-key
+# Make sure your Ollama server is running (see Docker instructions below)
 mvn spring-boot:run
 
 # OR use the convenience script
-export OPENAI_API_KEY=your-api-key
 ./run.sh
 ```
 
 ### 4. Run with Docker Compose
 
 ```bash
-# Build and run
+# Build and run (first run will download the phi3:mini model ~2.2 GB)
 docker-compose up --build
 
 # Run in detached mode
@@ -103,6 +94,12 @@ docker-compose up -d
 
 # Stop the services
 docker-compose down
+```
+
+Once the containers are healthy you can verify the Ollama service separately:
+
+```bash
+curl http://localhost:11434/api/tags | jq
 ```
 
 ## API Endpoints
@@ -154,13 +151,13 @@ Application properties (`src/main/resources/application.yml`):
 ```yaml
 spring:
   ai:
-    openai:
-      api-key: ${OPENAI_API_KEY}
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       chat:
         options:
-          model: gpt-4o-mini
+          model: phi3:mini
           temperature: 0.7
-          max-tokens: 4096
+          num-predict: 1024
 
 spacex:
   api:
@@ -198,7 +195,7 @@ spring-ai-poc/
 │   │   │   ├── client/
 │   │   │   │   └── SpaceXClient.java
 │   │   │   ├── config/
-│   │   │   │   └── SpaceXFunctionConfiguration.java
+│   │   │   │   └── ChatClientConfiguration.java
 │   │   │   ├── controller/
 │   │   │   │   └── SpaceXAiController.java
 │   │   │   ├── mcp/
@@ -226,7 +223,7 @@ spring-ai-poc/
 
 - Spring Boot 3.4
 - Spring AI 1.0.3
-- OpenAI (gpt-4o-mini)
+- Ollama (phi3:mini)
 - Spring WebFlux
 - Jackson
 - JUnit 5, MockWebServer
@@ -234,7 +231,7 @@ spring-ai-poc/
 
 ## Troubleshooting
 
-- Verify OPENAI_API_KEY is exported and valid
+- Verify the Ollama service is running: `curl http://localhost:11434/api/version`
 - Check connectivity to SpaceX API: `curl https://api.spacexdata.com/v4/launches/latest`
 - Use `docker-compose logs` for container logs
 - Apple Silicon (M1/M2/M3): If you see a "no match for platform in manifest" error when building images, update to the latest Docker Desktop. This project now uses multi-arch base images. As a workaround, you can also force the platform:
@@ -250,7 +247,7 @@ DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose build --no-cache
 ## Resources
 
 - Spring AI Documentation: https://docs.spring.io/spring-ai/reference/
-- OpenAI API: https://platform.openai.com/docs
+- Ollama: https://ollama.com/
 - SpaceX API: https://github.com/r-spacex/SpaceX-API
 - Model Context Protocol: https://modelcontextprotocol.io/
 

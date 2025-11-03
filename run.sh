@@ -2,12 +2,16 @@
 
 # Startup script for SpaceX AI REST service
 
-# Check if API key is set
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo "Error: OPENAI_API_KEY environment variable is not set"
-    echo "Please set it with: export OPENAI_API_KEY=your-api-key"
-    echo "Or create a .env file with your API key"
-    exit 1
+# Determine Ollama endpoint
+OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://localhost:11434}
+
+echo "Using Ollama endpoint: $OLLAMA_BASE_URL"
+if ! curl -sSf "$OLLAMA_BASE_URL/api/version" >/dev/null 2>&1; then
+    cat <<'EOF'
+Warning: could not reach the Ollama service. Make sure it is running.
+You can start it via Docker Compose:
+  docker-compose up ollama
+EOF
 fi
 
 # Check if jar exists
