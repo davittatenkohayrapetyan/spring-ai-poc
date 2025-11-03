@@ -1,2 +1,259 @@
-# spring-ai-poc
-Spring Boot REST service using Spring AI + Claude to query the public SpaceX API (https://docs.spacexdata.com/ ) from natural-language prompts. Exposes REST endpoints and @Tool methods; includes an MCP tool server so agents can call SpaceX data. Docker/Docker Compose for local run.
+# SpaceX AI - Spring Boot REST Service
+
+A Spring Boot 3.4 REST service that uses Spring AI with OpenAI to query the public SpaceX API (https://docs.spacexdata.com/) through natural language prompts. The service exposes REST endpoints and includes an MCP (Model Context Protocol) tool server for AI agents.
+
+## Features
+
+- 🚀 Spring Boot 3.4 with Java 17
+- 🤖 Spring AI integration with OpenAI (default model: gpt-4o-mini)
+- 📡 SpaceX API Client for launches, rockets, ships, and launchpads
+- 💬 Natural Language Interface via `/ask` endpoint
+- 🔌 MCP Tool Server for AI agent integration
+- 🐳 Docker & Docker Compose support
+- ✅ Unit Tests
+
+## Architecture
+
+```
+┌─────────────────┐
+│   User/Agent    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│          Spring Boot Application        │
+│                                         │
+│  ┌─────────────┐    ┌──────────────┐  │
+│  │ /ask        │───▶│ OpenAI via   │  │
+│  │ endpoint    │    │ Spring AI    │  │
+│  └─────────────┘    └──────┬───────┘  │
+│                             │          │
+│                             ▼          │
+│                     ┌────────────────┐ │
+│                     │ Tools/Services │ │
+│                     │ (Functions)    │ │
+│                     └────────┬───────┘ │
+│                              │         │
+│                              ▼         │
+│                     ┌────────────────┐ │
+│                     │ SpaceX Client  │ │
+│                     └────────┬───────┘ │
+└──────────────────────────────┼─────────┘
+                               │
+                               ▼
+                    ┌─────────────────┐
+                    │  SpaceX API     │
+                    │  (public)       │
+                    └─────────────────┘
+```
+
+## Prerequisites
+
+- Java 17 or higher
+- Maven 3.8+
+- Docker & Docker Compose (optional, for containerized deployment)
+- OpenAI API Key (get one from https://platform.openai.com/)
+
+## Quick Start
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/davittatenkohayrapetyan/spring-ai-poc.git
+cd spring-ai-poc
+```
+
+### 2. Set Up Environment Variables
+
+Create a `.env` file from the template:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your OpenAI API key:
+
+```
+OPENAI_API_KEY=your-actual-api-key-here
+```
+
+### 3. Run with Maven
+
+```bash
+# Build the project
+mvn clean package
+
+# Run the application
+export OPENAI_API_KEY=your-api-key
+mvn spring-boot:run
+
+# OR use the convenience script
+export OPENAI_API_KEY=your-api-key
+./run.sh
+```
+
+### 4. Run with Docker Compose
+
+```bash
+# Build and run
+docker-compose up --build
+
+# Run in detached mode
+docker-compose up -d
+
+# Stop the services
+docker-compose down
+```
+
+## API Endpoints
+
+### Quick Test
+
+You can run the included test script to try out the API:
+
+```bash
+# Make sure the application is running first
+./test-api.sh
+```
+
+### Health Check
+
+```bash
+curl http://localhost:8080/api/health
+```
+
+Response:
+```json
+{ "status": "UP" }
+```
+
+### Ask Endpoint (Natural Language Queries)
+
+Send natural language questions about SpaceX to get AI-powered responses:
+
+```bash
+curl -X POST http://localhost:8080/api/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is the latest SpaceX launch?"
+  }'
+```
+
+Example response:
+```json
+{
+  "question": "What is the latest SpaceX launch?",
+  "answer": "The latest SpaceX launch was..."
+}
+```
+
+## Configuration
+
+Application properties (`src/main/resources/application.yml`):
+
+```yaml
+spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.7
+          max-tokens: 4096
+
+spacex:
+  api:
+    base-url: https://api.spacexdata.com/v4
+```
+
+## SpaceX API Integration
+
+The application provides a REST client that fetches data from the public SpaceX API (https://api.spacexdata.com/v4).
+
+- Launches: all, upcoming, past, latest, next, by ID
+- Rockets: all or by ID
+- Ships: all or by ID
+- Launchpads: all or by ID
+
+## MCP Tool Server
+
+Run the MCP server separately if needed:
+
+```bash
+java -jar target/spacex-ai-1.0.0-SNAPSHOT.jar \
+  --spring.main.web-application-type=none
+```
+
+The server communicates via JSON-RPC over stdin/stdout.
+
+## Project Structure
+
+```
+spring-ai-poc/
+├── src/
+│   ├── main/
+│   │   ├── java/com/spacex/ai/
+│   │   │   ├── SpacexAiApplication.java
+│   │   │   ├── client/
+│   │   │   │   └── SpaceXClient.java
+│   │   │   ├── config/
+│   │   │   │   └── SpaceXFunctionConfiguration.java
+│   │   │   ├── controller/
+│   │   │   │   └── SpaceXAiController.java
+│   │   │   ├── mcp/
+│   │   │   │   ├── McpServerApplication.java
+│   │   │   │   └── McpToolServer.java
+│   │   │   ├── model/
+│   │   │   └── service/
+│   │   └── resources/
+│   │       └── application.yml
+│   └── test/
+│       └── java/com/spacex/ai/
+│           ├── client/
+│           │   └── SpaceXClientTest.java
+│           └── controller/
+│               └── SpaceXAiControllerTest.java
+├── Dockerfile
+├── docker-compose.yml
+├── pom.xml
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+## Technologies Used
+
+- Spring Boot 3.4
+- Spring AI 1.0.3
+- OpenAI (gpt-4o-mini)
+- Spring WebFlux
+- Jackson
+- JUnit 5, MockWebServer
+- Maven, Docker
+
+## Troubleshooting
+
+- Verify OPENAI_API_KEY is exported and valid
+- Check connectivity to SpaceX API: `curl https://api.spacexdata.com/v4/launches/latest`
+- Use `docker-compose logs` for container logs
+- Apple Silicon (M1/M2/M3): If you see a "no match for platform in manifest" error when building images, update to the latest Docker Desktop. This project now uses multi-arch base images. As a workaround, you can also force the platform:
+
+```bash
+# Build locally forcing linux/arm64
+DOCKER_DEFAULT_PLATFORM=linux/arm64 docker-compose build --no-cache
+
+# Or for x86 emulation (slower):
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose build --no-cache
+```
+
+## Resources
+
+- Spring AI Documentation: https://docs.spring.io/spring-ai/reference/
+- OpenAI API: https://platform.openai.com/docs
+- SpaceX API: https://github.com/r-spacex/SpaceX-API
+- Model Context Protocol: https://modelcontextprotocol.io/
+
+## License
+
+This project is open source and available under the MIT License.
