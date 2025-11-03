@@ -25,7 +25,7 @@ Thank you for your interest in contributing to the SpaceX AI project!
 
 3. Run the application:
    ```bash
-   # Ensure the Ollama service is running (docker-compose up ollama)
+   # Ensure the Ollama service is running (docker compose up ollama)
    mvn spring-boot:run
    ```
 

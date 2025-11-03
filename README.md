@@ -87,13 +87,13 @@ mvn spring-boot:run
 
 ```bash
 # Build and run (first run will download the phi3:mini model ~2.2 GB)
-docker-compose up --build
+docker compose up --build
 
 # Run in detached mode
-docker-compose up -d
+docker compose up -d
 
 # Stop the services
-docker-compose down
+docker compose down
 ```
 
 Once the containers are healthy you can verify the Ollama service separately:
@@ -233,15 +233,15 @@ spring-ai-poc/
 
 - Verify the Ollama service is running: `curl http://localhost:11434/api/version`
 - Check connectivity to SpaceX API: `curl https://api.spacexdata.com/v4/launches/latest`
-- Use `docker-compose logs` for container logs
+- Use `docker compose logs` for container logs
 - Apple Silicon (M1/M2/M3): If you see a "no match for platform in manifest" error when building images, update to the latest Docker Desktop. This project now uses multi-arch base images. As a workaround, you can also force the platform:
 
 ```bash
 # Build locally forcing linux/arm64
-DOCKER_DEFAULT_PLATFORM=linux/arm64 docker-compose build --no-cache
+DOCKER_DEFAULT_PLATFORM=linux/arm64 docker compose build --no-cache
 
 # Or for x86 emulation (slower):
-DOCKER_DEFAULT_PLATFORM=linux/amd64 docker-compose build --no-cache
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose build --no-cache
 ```
 
 ## Resources
