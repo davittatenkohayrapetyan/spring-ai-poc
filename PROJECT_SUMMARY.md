@@ -116,7 +116,7 @@ This project implements a Spring Boot 3.4 REST service that integrates Spring AI
 
 ### Quick Start
 ```bash
-# Ensure Ollama is running (docker-compose up ollama)
+# Ensure Ollama is running (docker compose up ollama)
 
 # Build and run
 ./run.sh
@@ -135,7 +135,7 @@ curl -X POST http://localhost:8080/api/ask \
 
 ### Run with Docker
 ```bash
-docker-compose up
+docker compose up
 ```
 
 ## Architecture Highlights

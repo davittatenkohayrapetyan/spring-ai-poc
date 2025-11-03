@@ -10,7 +10,7 @@ if ! curl -sSf "$OLLAMA_BASE_URL/api/version" >/dev/null 2>&1; then
     cat <<'EOF'
 Warning: could not reach the Ollama service. Make sure it is running.
 You can start it via Docker Compose:
-  docker-compose up ollama
+  docker compose up ollama
 EOF
 fi
 
