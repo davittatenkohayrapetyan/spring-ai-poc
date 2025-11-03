@@ -51,4 +51,15 @@ class SpaceXAiControllerTest {
                 .andExpect(jsonPath("$.question", equalTo("What is the latest SpaceX launch?")))
                 .andExpect(jsonPath("$.answer", equalTo("mocked answer")));
     }
+
+    @Test
+    void testAskEndpointWithMissingQuestion() throws Exception {
+        String requestJson = "{\"question\":\"\"}";
+
+        mockMvc.perform(post("/api/ask")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Question must be provided"));
+    }
 }
